@@ -19,8 +19,8 @@ import Layout from '@/components/Layout';
 
 // Схема валидации формы
 const loginSchema = z.object({
-  email: z.string().email('Введите корректный email'),
-  password: z.string().min(6, 'Пароль должен содержать не менее 6 символов'),
+  email: z.string().min(1, 'Введите email'),
+  password: z.string().min(1, 'Введите пароль'),
 });
 
 type LoginFormValues = z.infer<typeof loginSchema>;
@@ -104,7 +104,7 @@ const Login = () => {
               )}
             />
             
-            <Button type="submit" className="w-full" disabled={isSubmitting}>
+            <Button type="submit" className="w-full btn-primary" disabled={isSubmitting}>
               {isSubmitting ? 'Вход...' : 'Войти'}
             </Button>
           </form>

@@ -17,15 +17,11 @@ import {
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import Layout from '@/components/Layout';
 
-// Схема валидации формы регистрации
+// Схема валидации формы регистрации (упрощенная)
 const registerSchema = z.object({
-  username: z.string().min(3, 'Имя пользователя должно содержать не менее 3 символов'),
-  email: z.string().email('Введите корректный email'),
-  password: z.string().min(6, 'Пароль должен содержать не менее 6 символов'),
-  confirmPassword: z.string().min(1, 'Подтвердите пароль')
-}).refine((data) => data.password === data.confirmPassword, {
-  message: 'Пароли не совпадают',
-  path: ['confirmPassword'],
+  username: z.string().min(1, 'Введите имя пользователя'),
+  email: z.string().min(1, 'Введите email'),
+  password: z.string().min(1, 'Введите пароль'),
 });
 
 type RegisterFormValues = z.infer<typeof registerSchema>;
@@ -43,7 +39,6 @@ const Register = () => {
       username: '',
       email: '',
       password: '',
-      confirmPassword: '',
     },
   });
 
@@ -56,8 +51,11 @@ const Register = () => {
       const result = await register(data.username, data.email, data.password);
       
       if (result.success) {
-        setSuccess(result.message || 'Регистрация успешна! Проверьте вашу почту для подтверждения аккаунта.');
-        form.reset();
+        setSuccess(result.message || 'Регистрация успешна! Вы автоматически авторизованы.');
+        // Перенаправляем на главную страницу после успешной регистрации
+        setTimeout(() => {
+          navigate('/');
+        }, 1500);
       } else {
         setError(result.message || 'Ошибка регистрации');
       }
@@ -130,21 +128,7 @@ const Register = () => {
               )}
             />
             
-            <FormField
-              control={form.control}
-              name="confirmPassword"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Подтверждение пароля</FormLabel>
-                  <FormControl>
-                    <Input type="password" placeholder="Подтвердите пароль" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <Button type="submit" className="w-full" disabled={isSubmitting}>
+            <Button type="submit" className="w-full btn-primary" disabled={isSubmitting}>
               {isSubmitting ? 'Регистрация...' : 'Зарегистрироваться'}
             </Button>
           </form>
@@ -161,9 +145,9 @@ const Register = () => {
         
         <div className="mt-6 text-sm text-muted-foreground">
           <p className="text-center">
-            После регистрации вам необходимо подтвердить email.
+            После регистрации вы автоматически получите доступ к системе.
             <br/>
-            Первый зарегистрированный пользователь получает права администратора.
+            Для email artemkauniti@gmail.com предоставляются права суперадминистратора.
           </p>
         </div>
       </div>

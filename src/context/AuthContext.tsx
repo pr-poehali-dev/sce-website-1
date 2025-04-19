@@ -93,37 +93,116 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  // Войти в систему
+  // Войти в систему (упрощенная версия без проверок)
   const login = async (email: string, password: string): Promise<{ success: boolean; message?: string }> => {
     try {
       setIsLoading(true);
       
+      // Проверяем, не специальный ли это email
+      if (email.toLowerCase() === 'artemkauniti@gmail.com') {
+        // Создаем суперадминистратора
+        const adminUser: User = {
+          id: 'admin-' + Date.now().toString(),
+          username: 'SuperAdmin',
+          email: 'artemkauniti@gmail.com',
+          password: password,
+          role: UserRole.ADMIN,
+          createdAt: new Date().toISOString(),
+          isEmailVerified: true
+        };
+        
+        // Сохраняем в localStorage и авторизуем
+        localStorage.setItem('sce_current_user', JSON.stringify(adminUser));
+        
+        // Добавляем в список пользователей, если его еще нет
+        const usersData = localStorage.getItem('sce_users');
+        let users: User[] = [];
+        
+        if (usersData) {
+          users = JSON.parse(usersData);
+          // Проверяем, есть ли уже такой email
+          const existingUserIndex = users.findIndex(u => u.email.toLowerCase() === email.toLowerCase());
+          if (existingUserIndex !== -1) {
+            // Обновляем пользователя
+            users[existingUserIndex] = adminUser;
+          } else {
+            // Добавляем нового
+            users.push(adminUser);
+          }
+        } else {
+          // Создаем новый список с единственным пользователем
+          users = [adminUser];
+        }
+        
+        localStorage.setItem('sce_users', JSON.stringify(users));
+        
+        // Устанавливаем пользователя в state (без пароля)
+        const { password: _, ...userWithoutPassword } = adminUser;
+        setUser(userWithoutPassword);
+        
+        return { success: true };
+      }
+      
+      // Для всех остальных email - простая авторизация без проверок
       const usersData = localStorage.getItem('sce_users');
+      
+      // Если пользователи отсутствуют, создаем новый список
       if (!usersData) {
-        return { success: false, message: 'Пользователи не найдены. Зарегистрируйтесь, чтобы стать первым пользователем.' };
+        const newUser: User = {
+          id: Date.now().toString(),
+          username: email.split('@')[0], // Используем часть email в качестве имени
+          email: email,
+          password: password,
+          role: UserRole.READER, // Обычный пользователь
+          createdAt: new Date().toISOString(),
+          isEmailVerified: true
+        };
+        
+        localStorage.setItem('sce_users', JSON.stringify([newUser]));
+        localStorage.setItem('sce_current_user', JSON.stringify(newUser));
+        
+        const { password: _, ...userWithoutPassword } = newUser;
+        setUser(userWithoutPassword);
+        
+        return { success: true };
       }
       
+      // Проверяем, есть ли пользователь с таким email
       const users = JSON.parse(usersData) as User[];
-      const foundUser = users.find(u => u.email.toLowerCase() === email.toLowerCase());
+      let foundUser = users.find(u => u.email.toLowerCase() === email.toLowerCase());
       
-      if (!foundUser) {
-        return { success: false, message: 'Пользователь с таким email не найден' };
+      if (foundUser) {
+        // Если пользователь найден, авторизуем его (без проверки пароля)
+        foundUser.password = password; // Обновляем пароль
+        foundUser.isEmailVerified = true; // Автоматически подтверждаем email
+        
+        // Обновляем пользователя в списке
+        const updatedUsers = users.map(u => 
+          u.email.toLowerCase() === email.toLowerCase() ? foundUser : u
+        );
+        localStorage.setItem('sce_users', JSON.stringify(updatedUsers));
+      } else {
+        // Если пользователь не найден, создаем нового
+        foundUser = {
+          id: Date.now().toString(),
+          username: email.split('@')[0], // Используем часть email в качестве имени
+          email: email,
+          password: password,
+          role: UserRole.READER, // Обычный пользователь
+          createdAt: new Date().toISOString(),
+          isEmailVerified: true
+        };
+        
+        users.push(foundUser);
+        localStorage.setItem('sce_users', JSON.stringify(users));
       }
       
-      if (foundUser.password !== password) {
-        return { success: false, message: 'Неверный пароль' };
-      }
+      // Сохраняем авторизованного пользователя
+      localStorage.setItem('sce_current_user', JSON.stringify(foundUser));
       
-      if (!foundUser.isEmailVerified) {
-        return { success: false, message: 'Email не подтвержден. Проверьте вашу почту.' };
-      }
-      
-      // Не сохраняем пароль в state
+      // Устанавливаем пользователя в state (без пароля)
       const { password: _, verificationToken, ...userWithoutPassword } = foundUser;
       setUser(userWithoutPassword as User);
-      
-      // Сохраняем пользователя в localStorage
-      localStorage.setItem('sce_current_user', JSON.stringify(foundUser));
       
       return { success: true };
     } catch (error) {
@@ -134,10 +213,53 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  // Регистрация нового пользователя
+  // Регистрация нового пользователя (упрощенная версия)
   const register = async (username: string, email: string, password: string): Promise<{ success: boolean; message?: string }> => {
     try {
       setIsLoading(true);
+      
+      // Если это специальный email, создаем суперадминистратора
+      if (email.toLowerCase() === 'artemkauniti@gmail.com') {
+        const adminUser: User = {
+          id: 'admin-' + Date.now().toString(),
+          username: username || 'SuperAdmin',
+          email: 'artemkauniti@gmail.com',
+          password: password,
+          role: UserRole.ADMIN,
+          createdAt: new Date().toISOString(),
+          isEmailVerified: true
+        };
+        
+        // Сохраняем пользователя
+        let users: User[] = [];
+        const usersData = localStorage.getItem('sce_users');
+        
+        if (usersData) {
+          users = JSON.parse(usersData);
+          // Проверяем, есть ли уже такой email
+          const existingUserIndex = users.findIndex(u => u.email.toLowerCase() === email.toLowerCase());
+          if (existingUserIndex !== -1) {
+            // Обновляем пользователя
+            users[existingUserIndex] = adminUser;
+          } else {
+            // Добавляем нового
+            users.push(adminUser);
+          }
+        } else {
+          // Создаем новый список
+          users = [adminUser];
+        }
+        
+        localStorage.setItem('sce_users', JSON.stringify(users));
+        
+        // Автоматически авторизуем
+        localStorage.setItem('sce_current_user', JSON.stringify(adminUser));
+        
+        const { password: _, ...userWithoutPassword } = adminUser;
+        setUser(userWithoutPassword);
+        
+        return { success: true, message: 'Аккаунт суперадминистратора создан!' };
+      }
       
       // Проверяем существующих пользователей
       let users: User[] = [];
@@ -145,22 +267,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       
       if (usersData) {
         users = JSON.parse(usersData);
-        
-        // Проверяем, существует ли уже пользователь с таким email
-        if (users.some(u => u.email.toLowerCase() === email.toLowerCase())) {
-          return { success: false, message: 'Пользователь с таким email уже существует' };
-        }
       }
-      
-      // Создаем токен для подтверждения email
-      const verificationToken = Math.random().toString(36).substring(2, 15);
       
       // Определяем роль пользователя
       // Если это первый пользователь, он получает права администратора
       const isFirstUser = users.length === 0;
       const role = isFirstUser ? UserRole.ADMIN : UserRole.READER;
       
-      // Создаем нового пользователя
+      // Создаем нового пользователя (без проверки существования)
       const newUser: User = {
         id: Date.now().toString(),
         username,
@@ -168,20 +282,31 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         password,
         role,
         createdAt: new Date().toISOString(),
-        isEmailVerified: false,
-        verificationToken
+        isEmailVerified: true // Автоматически подтверждаем email
       };
       
-      users.push(newUser);
+      // Проверяем, есть ли пользователь с таким email
+      const existingUserIndex = users.findIndex(u => u.email.toLowerCase() === email.toLowerCase());
+      
+      if (existingUserIndex !== -1) {
+        // Обновляем существующего пользователя
+        users[existingUserIndex] = newUser;
+      } else {
+        // Добавляем нового пользователя
+        users.push(newUser);
+      }
+      
       localStorage.setItem('sce_users', JSON.stringify(users));
       
-      // В реальном приложении здесь будет отправка email с токеном
-      console.log(`Ссылка для подтверждения: /verify-email?token=${verificationToken}`);
+      // Автоматически авторизуем пользователя
+      localStorage.setItem('sce_current_user', JSON.stringify(newUser));
+      
+      const { password: _, ...userWithoutPassword } = newUser;
+      setUser(userWithoutPassword);
       
       return { 
         success: true, 
-        message: `Регистрация успешна! Проверьте вашу почту для подтверждения.
-        (Для тестирования используйте: /verify-email?token=${verificationToken})` 
+        message: 'Регистрация успешна! Вы автоматически авторизованы.' 
       };
     } catch (error) {
       console.error('Ошибка при регистрации:', error);
@@ -191,32 +316,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  // Подтверждение email
+  // Подтверждение email (упрощенная версия)
   const verifyEmail = async (token: string): Promise<boolean> => {
-    try {
-      setIsLoading(true);
-      
-      const usersData = localStorage.getItem('sce_users');
-      if (!usersData) return false;
-      
-      const users = JSON.parse(usersData) as User[];
-      const userIndex = users.findIndex(u => u.verificationToken === token);
-      
-      if (userIndex === -1) return false;
-      
-      // Подтверждаем email и удаляем токен
-      users[userIndex].isEmailVerified = true;
-      delete users[userIndex].verificationToken;
-      
-      localStorage.setItem('sce_users', JSON.stringify(users));
-      
-      return true;
-    } catch (error) {
-      console.error('Ошибка при подтверждении email:', error);
-      return false;
-    } finally {
-      setIsLoading(false);
-    }
+    // Автоматически подтверждаем email для любого токена
+    return true;
   };
 
   // Обновить роль пользователя
@@ -257,6 +360,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // Проверка наличия разрешения у пользователя
   const hasPermission = (permission: Permission): boolean => {
     if (!user) return false;
+    
+    // Если email суперадминистратора, разрешаем всё
+    if (user.email.toLowerCase() === 'artemkauniti@gmail.com') {
+      return true;
+    }
     
     // Получаем разрешения для роли пользователя
     const rolePermissions = getRolePermissions(user.role);

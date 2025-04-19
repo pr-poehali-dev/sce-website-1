@@ -2,35 +2,43 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+  font-family: 'SCP-Bauhaus';
+  src: url('/fonts/SCP-Bauhaus.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 0 0% 0%;
+    --background: 0 0% 98%;
+    --foreground: 0 0% 7%;
 
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 0%;
+    --card-foreground: 0 0% 7%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 0%;
+    --popover-foreground: 0 0% 7%;
 
-    --primary: 0 89% 38%;
+    --primary: 0 85% 38%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 0 0% 96%;
+    --secondary: 0 0% 92%;
     --secondary-foreground: 0 0% 9%;
 
-    --muted: 0 0% 96%;
-    --muted-foreground: 0 0% 45%;
+    --muted: 0 0% 92%;
+    --muted-foreground: 0 0% 38%;
 
-    --accent: 0 0% 96%;
-    --accent-foreground: 0 89% 38%;
+    --accent: 0 0% 87%;
+    --accent-foreground: 0 85% 38%;
 
-    --destructive: 0 89% 38%;
+    --destructive: 0 85% 38%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 0 0% 90%;
-    --input: 0 0% 90%;
-    --ring: 0 89% 38%;
+    --border: 0 0% 82%;
+    --input: 0 0% 82%;
+    --ring: 0 85% 38%;
 
     --radius: 0rem;
   }
@@ -45,7 +53,7 @@
     --popover: 0 0% 12%;
     --popover-foreground: 0 0% 100%;
 
-    --primary: 0 89% 38%;
+    --primary: 0 85% 38%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 0 0% 18%;
@@ -55,14 +63,14 @@
     --muted-foreground: 0 0% 64%;
 
     --accent: 0 0% 18%;
-    --accent-foreground: 0 89% 38%;
+    --accent-foreground: 0 85% 38%;
 
-    --destructive: 0 89% 38%;
+    --destructive: 0 85% 42%;
     --destructive-foreground: 0 0% 100%;
 
     --border: 0 0% 24%;
     --input: 0 0% 24%;
-    --ring: 0 89% 38%;
+    --ring: 0 85% 38%;
   }
 }
 
@@ -73,7 +81,16 @@
 
   body {
     @apply bg-background text-foreground;
-    font-family: 'Arial', sans-serif;
+    font-family: 'SCP-Bauhaus', sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'SCP-Bauhaus', sans-serif;
+    font-weight: 700;
+  }
+
+  button, a {
+    font-family: 'SCP-Bauhaus', sans-serif;
   }
 }
 
@@ -86,14 +103,14 @@
 
 .sce-header {
   background-color: black;
-  background-image: linear-gradient(#000000, #232323);
+  background-image: linear-gradient(#000000, #1a1a1a);
   color: white;
   padding: 0.75rem 0;
-  border-bottom: 2px solid #b01;
+  border-bottom: 3px solid #b01;
 }
 
 .sce-logo {
-  font-family: 'Arial', sans-serif;
+  font-family: 'SCP-Bauhaus', sans-serif;
   font-weight: bold;
   font-size: 1.75rem;
   text-transform: uppercase;
@@ -103,6 +120,10 @@
 .sce-navbar {
   background-color: #b01;
   color: white;
+}
+
+.sce-navbar a:hover {
+  background-color: rgba(0, 0, 0, 0.3);
 }
 
 .sce-footer {
@@ -116,6 +137,13 @@
   border: 1px solid #ccc;
   background-color: white;
   border-radius: 0px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.sce-object:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .sce-object-title {
@@ -123,7 +151,8 @@
   border-bottom: 1px solid #ddd;
   padding-bottom: 0.5rem;
   margin-bottom: 1rem;
-  font-family: 'Arial', sans-serif;
+  font-family: 'SCP-Bauhaus', sans-serif;
+  letter-spacing: 0.5px;
 }
 
 .sce-warning {
@@ -133,17 +162,55 @@
   text-align: center;
   margin-bottom: 1.5rem;
   font-weight: bold;
+  border: 1px solid #900;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .sce-content {
   background-color: white;
   padding: 2rem;
   border: 1px solid #ddd;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
 }
 
 .sce-sidebar {
   background-color: #f4f4f4;
   border: 1px solid #ddd;
+}
+
+/* Улучшенная видимость текста на кнопках */
+.btn-primary {
+  background-color: #b01;
+  color: white;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.btn-secondary {
+  background-color: #444;
+  color: white;
+  border: 1px solid #333;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.btn-outline {
+  background-color: transparent;
+  border: 2px solid currentColor;
+  font-weight: 600;
+}
+
+/* Специальные стили для админ-панели */
+.admin-header {
+  background-color: #212121;
+  border-bottom: 3px solid #b01;
+}
+
+/* Улучшенная контрастность для текста */
+.high-contrast {
+  color: #000 !important;
+  background-color: #fff !important;
+  border: 1px solid #222;
 }
 
 @media (max-width: 768px) {
