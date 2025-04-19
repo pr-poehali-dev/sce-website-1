@@ -124,14 +124,15 @@ const PostsList = () => {
             <Card key={post.id}>
               <CardHeader>
                 <CardTitle>{post.title}</CardTitle>
-                <CardDescription>
+                {/* Вместо CardDescription используем обычный div с нужными стилями */}
+                <div className="text-sm text-muted-foreground">
                   <div className="flex justify-between items-center">
                     <span>{new Date(post.createdAt).toLocaleDateString()}</span>
                     <Badge className={getCategoryBadgeColor(post.category)}>
                       {getCategoryName(post.category)}
                     </Badge>
                   </div>
-                </CardDescription>
+                </div>
               </CardHeader>
               <CardContent>
                 <p className="line-clamp-3 text-sm">{post.content}</p>
