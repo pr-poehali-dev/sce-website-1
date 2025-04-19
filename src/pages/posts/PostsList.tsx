@@ -124,11 +124,13 @@ const PostsList = () => {
             <Card key={post.id}>
               <CardHeader>
                 <CardTitle>{post.title}</CardTitle>
-                <CardDescription className="flex justify-between items-center">
-                  <span>{new Date(post.createdAt).toLocaleDateString()}</span>
-                  <Badge className={getCategoryBadgeColor(post.category)}>
-                    {getCategoryName(post.category)}
-                  </Badge>
+                <CardDescription>
+                  <div className="flex justify-between items-center">
+                    <span>{new Date(post.createdAt).toLocaleDateString()}</span>
+                    <Badge className={getCategoryBadgeColor(post.category)}>
+                      {getCategoryName(post.category)}
+                    </Badge>
+                  </div>
                 </CardDescription>
               </CardHeader>
               <CardContent>
